@@ -31,6 +31,16 @@ public class QuandlQuery {
       return NSURL()
     }
   }
+  
+  func run(completion: (NSData?, NSURLResponse?, NSError?) -> Void) {
+    let defaultConfigObject = NSURLSessionConfiguration.defaultSessionConfiguration()
+    let querySession = NSURLSession(configuration: defaultConfigObject)
+    let queryRequest = NSURLRequest(URL: self.URL)
+    querySession.dataTaskWithRequest(queryRequest) { (data, response, error) -> Void in
+      completion(data, response, error)
+    }.resume()
+  }
+  
 }
 
 //--QuandlDataQuery
@@ -256,7 +266,9 @@ public class QuandlDatasetQuery: QuandlQuery {
       }
       
       if let queryTerms = self.queryTerms {
-        let queryTermsString = queryTerms.joinWithSeparator("+")
+        var queryTermsString = queryTerms.joinWithSeparator("+")
+        queryTermsString = queryTermsString.stringByAddingPercentEncodingWithAllowedCharacters(.URLHostAllowedCharacterSet())!
+
         queryItems.append( NSURLQueryItem(name: "query", value: queryTermsString) )
       }
       
@@ -309,7 +321,8 @@ public class QuandlDatabaseListQuery: QuandlQuery {
       }
       
       if let queryTerms = self.queryTerms {
-        let queryTermsString = queryTerms.joinWithSeparator("+")
+        var queryTermsString = queryTerms.joinWithSeparator("+")
+        queryTermsString = queryTermsString.stringByAddingPercentEncodingWithAllowedCharacters(.URLHostAllowedCharacterSet())!
         queryItems.append( NSURLQueryItem(name: "query", value: queryTermsString) )
       }
       
